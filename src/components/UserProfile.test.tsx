@@ -2,8 +2,18 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import UserProfile from './UserProfile'
+import TestSWRProvider from '../test-utils/TestSWRProvider'
 
 describe('UserProfile', () => {
+  // Helper function to render with TestSWRProvider
+  const renderWithProvider = (ui: React.ReactElement) => {
+    return render(
+      <TestSWRProvider>
+        {ui}
+      </TestSWRProvider>
+    )
+  }
+
   beforeEach(() => {
     // 重置並初始化 fetchMock
     fetchMock.restore()
@@ -14,7 +24,7 @@ describe('UserProfile', () => {
     // 使用 delay 來保持載入狀態
     fetchMock.get('/api/user/1', { delay: 1000 })
 
-    render(<UserProfile userId="1" />)
+    renderWithProvider(<UserProfile userId="1" />)
     
     expect(screen.getByText('載入中...')).toBeInTheDocument()
   })
@@ -34,7 +44,7 @@ describe('UserProfile', () => {
 
     fetchMock.get('/api/user/1', mockUser)
 
-    render(<UserProfile userId="1" />)
+    renderWithProvider(<UserProfile userId="1" />)
 
     await waitFor(() => {
       expect(screen.queryByText('載入中...')).not.toBeInTheDocument()
@@ -57,7 +67,7 @@ describe('UserProfile', () => {
   it('處理錯誤狀態', async () => {
     fetchMock.get('/api/user/1', 500)
 
-    render(<UserProfile userId="1" />)
+    renderWithProvider(<UserProfile userId="1" />)
 
     await waitFor(() => {
       expect(screen.queryByText('載入中...')).not.toBeInTheDocument()
@@ -70,7 +80,7 @@ describe('UserProfile', () => {
   it('當 API 回傳 404 時顯示找不到資料', async () => {
     fetchMock.get('/api/user/1', 404)
 
-    render(<UserProfile userId="1" />)
+    renderWithProvider(<UserProfile userId="1" />)
 
     await waitFor(() => {
       expect(screen.queryByText('載入中...')).not.toBeInTheDocument()
@@ -83,7 +93,7 @@ describe('UserProfile', () => {
   it('處理網路錯誤', async () => {
     fetchMock.get('/api/user/1', { throws: new Error('Network error') })
 
-    render(<UserProfile userId="1" />)
+    renderWithProvider(<UserProfile userId="1" />)
 
     await waitFor(() => {
       expect(screen.queryByText('載入中...')).not.toBeInTheDocument()
@@ -99,7 +109,7 @@ describe('UserProfile', () => {
       headers: { 'Content-Type': 'application/json' } 
     })
 
-    render(<UserProfile userId="1" />)
+    renderWithProvider(<UserProfile userId="1" />)
 
     await waitFor(() => {
       expect(screen.queryByText('載入中...')).not.toBeInTheDocument()

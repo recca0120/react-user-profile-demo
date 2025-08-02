@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React from 'react';
+import useSWR from 'swr';
 import './UserProfile.css';
 import { User } from '../types/user';
 
@@ -6,35 +7,21 @@ interface UserProfileProps {
     userId: string;
 }
 
+const fetcher = (url: string): Promise<User> => 
+    fetch(url).then(res => {
+        if (!res.ok) {
+            throw new Error('Failed to fetch user data');
+        }
+        return res.json();
+    });
+
 const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const { data: user, error, isLoading } = useSWR<User>(
+        `/api/user/${userId}`,
+        fetcher
+    );
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                setLoading(true);
-                const url = `/api/user/${userId}`;
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch user data');
-                }
-                
-                const data: User = await response.json();
-                setUser(data);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'An error occurred');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUser();
-    }, [userId]);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="user-profile loading">
                 <p>載入中...</p>
@@ -45,7 +32,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
     if (error) {
         return (
             <div className="user-profile error">
-                <p>錯誤: {error}</p>
+                <p>錯誤: {error.message}</p>
             </div>
         );
     }
