@@ -7,18 +7,15 @@ interface UserProfileProps {
     userId: string;
 }
 
-const fetcher = (url: string): Promise<User> => 
-    fetch(url).then(res => {
-        if (!res.ok) {
-            throw new Error('Failed to fetch user data');
-        }
-        return res.json();
-    });
-
 const UserProfile: React.FC<UserProfileProps> = ({ userId }) => {
     const { data: user, error, isLoading } = useSWR<User>(
         `/api/user/${userId}`,
-        fetcher
+        (url: string) => fetch(url).then(res => {
+            if (!res.ok) {
+                throw new Error('Failed to fetch user data');
+            }
+            return res.json();
+        })
     );
 
     if (isLoading) {
