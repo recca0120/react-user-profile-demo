@@ -1,0 +1,13 @@
+.app {
+  min-height: 100vh;
+  padding: 40px 20px;
+  background-color: #f5f7fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-section {
+  width: 100%;
+  max-width: 600px;
+}
