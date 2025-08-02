@@ -9,29 +9,10 @@ const TestSWRProvider: React.FC<TestSWRProviderProps> = ({ children }) => {
     return (
         <SWRConfig
             value={{
-                // Disable all caching and revalidation for tests
+                // Use a new cache for each test
                 provider: () => new Map(),
-                isOnline: () => true,
-                isVisible: () => true,
-                initFocus: () => {},
-                initReconnect: () => {},
-                revalidateOnFocus: false,
-                revalidateOnReconnect: false,
-                revalidateIfStale: false,
-                revalidateOnMount: true,
-                refreshInterval: 0,
-                dedupingInterval: 0,
+                // Disable retries for tests
                 shouldRetryOnError: false,
-                errorRetryInterval: 0,
-                errorRetryCount: 0,
-                fallback: {},
-                // Use fetcher that works with fetchMock
-                fetcher: (url: string) => fetch(url).then(res => {
-                    if (!res.ok) {
-                        throw new Error('Failed to fetch');
-                    }
-                    return res.json();
-                }),
             }}
         >
             {children}
